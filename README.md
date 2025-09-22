@@ -13,6 +13,7 @@
 - Now it can be deployed on Cloudflare Pages for free!
 - Also support [Docker Deployment](https://github.com/lyc8503/onedrive-cf-index-ng/wiki/Docker-Deployment) now!
 - No more dependency on Upstash / 3rd-party service
+- **NEW: Optional Logto authentication integration** for additional user authentication layer
 - Maybe some future maintenance or improvements from me ([@lyc8503](https://github.com/lyc8503))
 
 *Special thanks to the original author of this project [@spencerwooo](https://github.com/spencerwooo) and all contributors*
@@ -118,6 +119,7 @@ Documentation is hosted at [GitHub Wiki](https://github.com/lyc8503/onedrive-cf-
 
 - [How can I get started and deploy?](https://github.com/lyc8503/onedrive-cf-index-ng/wiki/Getting-Started)
 - [How can I configure ... ?](https://github.com/lyc8503/onedrive-cf-index-ng/wiki/Configurations)
+- **[Logto Authentication Integration](docs/LOGTO_INTEGRATION.md)** - How to set up optional user authentication
 - Where is feature ... ?
   - [Docs - Password protected folders](https://ovi.swo.moe/docs/features/protected-folders)
   - [Docs - Multi-file and folder download](https://ovi.swo.moe/docs/features/multi-file-folder-download)
