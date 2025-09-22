@@ -24,6 +24,7 @@ import { layouts } from './SwitchLayout'
 import Loading, { LoadingIcon } from './Loading'
 import FourOhFour from './FourOhFour'
 import Auth from './Auth'
+import LogtoAuth from './LogtoAuth'
 import TextPreview from './previews/TextPreview'
 import MarkdownPreview from './previews/MarkdownPreview'
 import CodePreview from './previews/CodePreview'
@@ -166,6 +167,15 @@ const FileListing: FC<{ query?: ParsedUrlQuery }> = ({ query }) => {
     if (error.status === 403) {
       router.push('/onedrive-oauth/step-1')
       return <div />
+    }
+
+    // Check if this is a Logto authentication error
+    if (error.status === 401 && error.message?.authType === 'logto') {
+      return (
+        <PreviewContainer>
+          <LogtoAuth onAuthSuccess={() => router.reload()} />
+        </PreviewContainer>
+      )
     }
 
     return (

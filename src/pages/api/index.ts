@@ -7,6 +7,7 @@ import siteConfig from '../../../config/site.config'
 import { getAuthPersonInfo, revealObfuscatedToken } from '../../utils/oAuthHandler'
 import { compareHashedToken } from '../../utils/protectedRouteHandler'
 import { getOdAuthTokens, storeOdAuthTokens } from '../../utils/odAuthTokenStore'
+import { isLogtoEnabled } from '../../utils/logtoHandler'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const runtime = 'edge'
@@ -157,7 +158,50 @@ export async function checkAuthRoute(
   return { code: 200, message: 'Authenticated.' }
 }
 
+/**
+ * Check Logto authentication if enabled
+ * @param req Next.js request object
+ * @returns Promise<{ isAuthenticated: boolean; user?: any; error?: string }>
+ */
+export async function checkLogtoAuth(req: NextRequest): Promise<{ isAuthenticated: boolean; user?: any; error?: string }> {
+  if (!isLogtoEnabled()) {
+    return { isAuthenticated: true } // Skip Logto auth if not enabled
+  }
+
+  try {
+    const LogtoClient = await import('@logto/next/server-actions')
+    const { logtoConfiguration, extractUserInfo } = await import('../../utils/logtoHandler')
+    
+    const logtoClient = new LogtoClient.default(logtoConfiguration)
+    const context = await logtoClient.getLogtoContext()
+    
+    if (!context.isAuthenticated) {
+      return { isAuthenticated: false, error: 'Logto authentication required' }
+    }
+
+    const user = extractUserInfo(context.claims)
+    return { isAuthenticated: true, user }
+    
+  } catch (error) {
+    console.error('Error checking Logto authentication:', error)
+    return { isAuthenticated: false, error: 'Logto authentication error' }
+  }
+}
+
 export default async function handler(req: NextRequest): Promise<Response> {
+  // Check Logto authentication first if enabled
+  const logtoAuth = await checkLogtoAuth(req)
+  if (!logtoAuth.isAuthenticated) {
+    return new Response(JSON.stringify({ 
+      error: logtoAuth.error || 'Authentication required',
+      authRequired: true,
+      authType: 'logto'
+    }), { 
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
+
   // If method is POST, then the API is called by the client to store acquired tokens
   if (req.method === 'POST') {
     const { accessToken, accessTokenExpiry, refreshToken } = await req.json()
